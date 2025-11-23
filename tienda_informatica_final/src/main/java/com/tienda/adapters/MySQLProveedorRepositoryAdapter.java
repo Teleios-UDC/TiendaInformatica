@@ -11,10 +11,10 @@ import java.util.List;
 
 public class MySQLProveedorRepositoryAdapter implements ProveedorRepositoryPort {
 
-    // --- QUERIES SQL (AJUSTADAS SIN NOMBRE EN PROVEEDOR) ---
+    //Consultas SQL
     private static final String SQL_INSERT_DIRECCION = 
         "INSERT INTO DIRECCION (Ciudad, Barrio, Calle) VALUES (?, ?, ?)";
-    // Solo NIF y FK
+
     private static final String SQL_INSERT_PROVEEDOR = 
         "INSERT INTO PROVEEDOR (NIF, DIRECCION_IdDIRECCION) VALUES (?, ?)"; 
         
@@ -41,9 +41,7 @@ public class MySQLProveedorRepositoryAdapter implements ProveedorRepositoryPort 
         "DELETE FROM PROVEEDOR WHERE idPROVEEDOR = ?";
 
 
-    // =======================================================
-    // MÉTODO SAVE (AJUSTADO)
-    // =======================================================
+    // MÉTODO SAVE
     @Override
     public int save(Proveedor proveedor) {
         Connection conn = null;
@@ -54,7 +52,7 @@ public class MySQLProveedorRepositoryAdapter implements ProveedorRepositoryPort 
             conn = DatabaseConfig.getConnection();
             conn.setAutoCommit(false); 
 
-            // 1. Insertar DIRECCION (3 parámetros)
+            //Insertar DIRECCION
             try (PreparedStatement ps = conn.prepareStatement(SQL_INSERT_DIRECCION, Statement.RETURN_GENERATED_KEYS)) {
                 ps.setString(1, proveedor.getDireccion().getCiudad());
                 ps.setString(2, proveedor.getDireccion().getBarrio());
@@ -67,12 +65,11 @@ public class MySQLProveedorRepositoryAdapter implements ProveedorRepositoryPort 
                     }
                 }
             }
-            
-            // 2. Insertar PROVEEDOR (2 parámetros: NIF, FK_DIRECCION)
+
+            //Insertar PROVEEDOR
             try (PreparedStatement ps = conn.prepareStatement(SQL_INSERT_PROVEEDOR, Statement.RETURN_GENERATED_KEYS)) {
                 ps.setString(1, proveedor.getNif());        
-                // ps.setString(2, proveedor.getNombre()); // ELIMINADO
-                ps.setInt(2, idDireccionGenerado); // Se mueve a la posición 2
+                ps.setInt(2, idDireccionGenerado);
                 ps.executeUpdate();
                 try (ResultSet rs = ps.getGeneratedKeys()) {
                     if (rs.next()) {
@@ -97,9 +94,9 @@ public class MySQLProveedorRepositoryAdapter implements ProveedorRepositoryPort 
         return idProveedorGenerado;
     }
 
-    // =======================================================
-    // MÉTODO UPDATE (AJUSTADO)
-    // =======================================================
+
+    // MÉTODO UPDATE
+
     @Override
     public boolean update(Proveedor proveedor) {
         Connection conn = null;
@@ -108,15 +105,15 @@ public class MySQLProveedorRepositoryAdapter implements ProveedorRepositoryPort 
             conn = DatabaseConfig.getConnection();
             conn.setAutoCommit(false);
 
-            // 1. Actualizar PROVEEDOR (Solo NIF)
+            // 1. Actualizar PROVEEDOR
             try (PreparedStatement ps = conn.prepareStatement(SQL_UPDATE_PROVEEDOR)) {
                 ps.setString(1, proveedor.getNif());
-                // ps.setString(2, proveedor.getNombre()); // ELIMINADO
-                ps.setInt(2, proveedor.getIdProveedor()); // Se mueve a la posición 2
+
+                ps.setInt(2, proveedor.getIdProveedor());
                 if (ps.executeUpdate() == 0) throw new SQLException("Fallo al actualizar PROVEEDOR.");
             }
 
-            // 2. Actualizar DIRECCION (Sin cambios, ya estaba sin País)
+            // 2. Actualizar DIRECCION
             if (proveedor.getDireccion() != null && proveedor.getDireccion().getIdDIRECCION() > 0) {
                 try (PreparedStatement ps = conn.prepareStatement(SQL_UPDATE_DIRECCION)) {
                     ps.setString(1, proveedor.getDireccion().getCiudad());
@@ -142,11 +139,10 @@ public class MySQLProveedorRepositoryAdapter implements ProveedorRepositoryPort 
         return success;
     }
     
-    // ... (delete sin cambios)
 
-    // =======================================================
+
     // Mapeo (SIN Nombre)
-    // =======================================================
+
     private Proveedor mapResultSetToProveedor(ResultSet rs) throws SQLException {
         
         // Mapear Direccion
@@ -161,7 +157,6 @@ public class MySQLProveedorRepositoryAdapter implements ProveedorRepositoryPort 
         return new Proveedor(
             rs.getInt("idPROVEEDOR"),
             rs.getString("NIF"),
-            // rs.getString("Nombre"), // ELIMINADO
             direccion
         );
     }
