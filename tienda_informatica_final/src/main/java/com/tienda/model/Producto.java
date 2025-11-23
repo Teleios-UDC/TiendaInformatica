@@ -6,11 +6,21 @@ public class Producto {
     private String nombre;
     private String modelo;
     private String descripcion;
+    private int idCategoria;
+    private int idProductoAltaTecnologia;
     private Categoria categoria;
     private ProductoAltaTecnologia productoAltaTecnologia;
 
 
     public Producto() {
+    }
+
+    public Producto(int idProducto, String nombre, String modelo, String descripcion, int idCategoria) {
+        this.idProducto = idProducto;
+        this.nombre = nombre;
+        this.modelo = modelo;
+        this.descripcion = descripcion;
+        this.idCategoria = idCategoria;
     }
     
 
@@ -30,6 +40,15 @@ public class Producto {
     }
 
     // Getters y Setters
+
+    public int getIdCategoria() {
+        return idCategoria;
+    }
+
+    public void setIdCategoria(int idCategoria) {
+        this.idCategoria = idCategoria;
+    }
+
     public int getIdProducto() {
         return idProducto;
     }
