@@ -162,20 +162,56 @@ public class MySQLProveedorRepositoryAdapter implements ProveedorRepositoryPort 
     }
 
     @Override
-    public Proveedor findById(int id) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'findById'");
+    public List<Proveedor> findAll() {
+        List<Proveedor> proveedores = new ArrayList<>();
+        try (Connection conn = DatabaseConfig.getConnection();
+             PreparedStatement ps = conn.prepareStatement(SQL_SELECT_ALL_PROVEEDORES);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                proveedores.add(mapResultSetToProveedor(rs));
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error al consultar todos los Proveedores: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return proveedores;
     }
 
     @Override
-    public List<Proveedor> findAll() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'findAll'");
+    public Proveedor findById(int id) {
+        Proveedor proveedor = null;
+        try (Connection conn = DatabaseConfig.getConnection();
+             PreparedStatement ps = conn.prepareStatement(SQL_SELECT_PROVEEDOR_BY_ID)) {
+
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    proveedor = mapResultSetToProveedor(rs);
+                }
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error al consultar Proveedor por ID: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return proveedor;
     }
 
     @Override
     public boolean delete(int id) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'delete'");
+        boolean success = false;
+        try (Connection conn = DatabaseConfig.getConnection();
+             PreparedStatement ps = conn.prepareStatement(SQL_DELETE_PROVEEDOR)) {
+
+            ps.setInt(1, id);
+            success = ps.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            System.err.println("Error al eliminar Proveedor: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return success;
     }
 }
